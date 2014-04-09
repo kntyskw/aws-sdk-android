@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2010-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -21,16 +21,11 @@ package com.amazonaws.internal.config;
  * marshaller/unmarshaller.
  */
 class SignerConfigJsonHelper implements Builder<SignerConfig> {
+
     private String signerType;
-    private boolean doubleUrlEncode;
 
-    SignerConfigJsonHelper(SignerType signerType, boolean doubleUrlEncode) {
-        this.signerType = signerType.name();
-        this.doubleUrlEncode = doubleUrlEncode;
-    }
-
-    SignerConfigJsonHelper(SignerType signerType) {
-        this(signerType, false);
+    SignerConfigJsonHelper(String signerType) {
+        this.signerType = signerType;
     }
 
     SignerConfigJsonHelper() {}
@@ -39,20 +34,12 @@ class SignerConfigJsonHelper implements Builder<SignerConfig> {
         return signerType;
     }
 
-    public boolean isDoubleUrlEncode() {
-        return doubleUrlEncode;
-    }
-
     void setSignerType(String signerType) {
         this.signerType = signerType;
     }
 
-    void setDoubleUrlEncode(boolean doubleUrlEncode) {
-        this.doubleUrlEncode = doubleUrlEncode;
-    }
-
-    @Override public SignerConfig build() {
-        SignerType signerType = SignerType.valueOf(this.signerType);
-        return new SignerConfig(signerType, doubleUrlEncode);
+    @Override
+    public SignerConfig build() {
+        return new SignerConfig(signerType);
     }
 }

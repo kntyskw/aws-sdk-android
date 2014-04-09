@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2010-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -94,6 +94,32 @@ public class AWSRequestMetrics {
          * excluding any retry. 
          */
         HttpClientReceiveResponseTime,
+
+        /**
+         * The number of idle persistent connections.
+         * <p>
+         * Reference: https://hc.apache
+         * .org/httpcomponents-core-ga/httpcore/apidocs/org/apache
+         * /http/pool/PoolStats.html
+         */
+        HttpClientPoolAvailableCount,
+        /**
+         * The number of persistent connections tracked by the connection
+         * manager currently being used to execute requests.
+         * <p>
+         * Reference: https://hc
+         * .apache.org/httpcomponents-core-ga/httpcore/apidocs/org/apache
+         * /http/pool/PoolStats.html
+         */
+        HttpClientPoolLeasedCount,
+        /**
+         * The number of connection requests being blocked awaiting a free
+         * connection.
+         * <p>
+         * Reference: https://hc.apache.org/httpcomponents-core-ga/httpcore
+         * /apidocs/org/apache/http/pool/PoolStats.html
+         */
+        HttpClientPoolPendingCount,
         RetryPauseTime,
 //      S3DownloadThroughput, // migrated to S3RequestMetric in the S3 clint library
 //      S3UploadThroughput,   // migrated to S3RequestMetric in the S3 clint library
