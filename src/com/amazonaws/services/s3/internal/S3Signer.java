@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2010-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -63,6 +63,14 @@ public class S3Signer extends AbstractAWSSigner {
     private final String resourcePath;
 
     /**
+     * Create a dummy instance of the S3Signer.
+     */
+    public S3Signer() {
+        this.httpVerb = null;
+        this.resourcePath = null;
+    }
+
+    /**
      * Constructs a new S3Signer to sign requests based on the
      * AWS credentials, HTTP method and canonical S3 resource path.
      *
@@ -81,7 +89,16 @@ public class S3Signer extends AbstractAWSSigner {
             throw new IllegalArgumentException("Parameter resourcePath is empty");
     }
 
-    public void sign(Request<?> request, AWSCredentials credentials) throws AmazonClientException {
+    @Override
+    public void sign(Request<?> request, AWSCredentials credentials) {
+
+        if (resourcePath == null) {
+            throw new UnsupportedOperationException(
+                "Cannot sign a request using a dummy S3Signer instance with "
+                + "no resource path"
+            );
+        }
+
         if (credentials == null || credentials.getAWSSecretKey() == null) {
             log.debug("Canonical string will not be signed, as no AWS Secret Key was provided");
             return;

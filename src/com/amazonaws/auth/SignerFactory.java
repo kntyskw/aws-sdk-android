@@ -28,13 +28,13 @@ public final class SignerFactory {
     private static final String VERSION_FOUR_SIGNER = "AWS4SignerType";
 
     private static final Map<String, Class<? extends Signer>> SIGNERS
-    	= new ConcurrentHashMap<String, Class<? extends Signer>>();
+        = new ConcurrentHashMap<String, Class<? extends Signer>>();
 
     static {
-    	// Register the standard signer types.
-    	SIGNERS.put(QUERY_STRING_SIGNER, QueryStringSigner.class);
-    	SIGNERS.put(VERSION_THREE_SIGNER, AWS3Signer.class);
-    	SIGNERS.put(VERSION_FOUR_SIGNER, AWS4Signer.class);
+        // Register the standard signer types.
+        SIGNERS.put(QUERY_STRING_SIGNER, QueryStringSigner.class);
+        SIGNERS.put(VERSION_THREE_SIGNER, AWS3Signer.class);
+        SIGNERS.put(VERSION_FOUR_SIGNER, AWS4Signer.class);
     }
 
     /**
@@ -59,7 +59,8 @@ public final class SignerFactory {
         if (signerClass == null) {
             throw new IllegalArgumentException("signerClass cannot be null");
         }
-        SIGNERS.put(signerType, signerClass);        
+
+        SIGNERS.put(signerType, signerClass);
     }
 
     /**
@@ -110,20 +111,20 @@ public final class SignerFactory {
      */
     private static Signer createSigner(String signerType,
             final String serviceName) {
-    	
-    	/*
-    	 * Replaced signer creation logic based on reflection API by
-    	 * simple case switching in order to avoid runtime error on Android
-    	 */
+        Class<? extends Signer> signerClass = SIGNERS.get(signerType);
+        if (signerClass == null)
+            throw new IllegalArgumentException();
         Signer signer;
-        if (QUERY_STRING_SIGNER.equals(signerType)){
-        	signer = new QueryStringSigner();
-        } else if (VERSION_THREE_SIGNER.equals(signerType)){
-        	signer = new AWS3Signer();
-        } else if (VERSION_FOUR_SIGNER.equals(signerType)){
-        	signer = new AWS4Signer();
-        } else {
-        	signer = new AWS4Signer();
+        try {
+            signer = signerClass.newInstance();
+        } catch (InstantiationException ex) {
+            throw new IllegalStateException(
+                "Cannot create an instance of " + signerClass.getName(),
+                ex);
+        } catch (IllegalAccessException ex) {
+            throw new IllegalStateException(
+                "Cannot create an instance of " + signerClass.getName(),
+                ex);
         }
 
         if (signer instanceof ServiceAwareSigner) {

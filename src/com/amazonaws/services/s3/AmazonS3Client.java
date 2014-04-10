@@ -55,6 +55,7 @@ import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.ClasspathPropertiesFileCredentialsProvider;
 import com.amazonaws.auth.Signer;
+import com.amazonaws.auth.SignerFactory;
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.event.ProgressEvent;
 import com.amazonaws.event.ProgressListener;
@@ -81,6 +82,7 @@ import com.amazonaws.services.s3.internal.RepeatableFileInputStream;
 import com.amazonaws.services.s3.internal.RepeatableInputStream;
 import com.amazonaws.services.s3.internal.ResponseHeaderHandlerChain;
 import com.amazonaws.services.s3.internal.S3ErrorResponseHandler;
+import com.amazonaws.services.s3.internal.S3ExecutionContext;
 import com.amazonaws.services.s3.internal.S3MetadataResponseHandler;
 import com.amazonaws.services.s3.internal.S3ObjectResponseHandler;
 import com.amazonaws.services.s3.internal.S3QueryStringSigner;
@@ -207,12 +209,20 @@ import com.amazonaws.util.Md5Utils;
 public class AmazonS3Client extends AmazonWebServiceClient implements AmazonS3 {
 
     public static final String S3_SERVICE_NAME = "s3";
-
+    
+    private static final String S3_SIGNER = "S3SignerType";
+    private static final String S3_V4_SIGNER = "AWSS3V4SignerType";
+    
     /** Shared logger for client events */
     private static Log log = LogFactory.getLog(AmazonS3Client.class);
 
     static { // enable S3 specific predefined request metrics
         AwsSdkMetrics.addAll(Arrays.asList(S3ServiceMetric.values()));
+        
+        
+        // Register S3-specific signers.
+        SignerFactory.registerSigner(S3_SIGNER, S3Signer.class);
+        //SignerFactory.registerSigner(S3_V4_SIGNER, AWSS3V4Signer.class);
     }
 
     /** Responsible for handling error responses from all S3 service calls. */
@@ -3171,6 +3181,12 @@ public class AmazonS3Client extends AmazonWebServiceClient implements AmazonS3 {
                                   String bucketName,
                                   String key) {
         return invoke(request, new S3XmlResponseHandler<X>(unmarshaller), bucketName, key);
+    }
+
+    
+    protected ExecutionContext createExecutionContext(AmazonWebServiceRequest req) {
+        boolean isMetricsEnabled = isRequestMetricsEnabled(req) || isProfilingEnabled();
+        return new S3ExecutionContext(requestHandler2s, isMetricsEnabled, this);
     }
 
     private <X, Y extends AmazonWebServiceRequest> X invoke(Request<Y> request,
